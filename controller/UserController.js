@@ -97,50 +97,92 @@ export const UserList = (req, res) => {
   }
 };
 
-export const StoreProject = (req,res)=>{
-  const { project_name, description,members,admin } = req.body;
-try {
-  const saveProject = "INSERT INTO `projects`(admin_id,project_name,description,members) VALUES(?,?,?,?)";
-  const project = db_conn.query(saveProject,[admin,project_name,description,JSON.stringify(members)],(err,result)=>{
-    if(err) throw err;
-    return res.status(200).json({ result: "success", msg: "Project Successfully Created." });
-  })  
+export const StoreProject = (req, res) => {
+  const { project_name, description, members, admin } = req.body;
+  try {
+    const saveProject =
+      "INSERT INTO `projects`(admin_id,project_name,description,members) VALUES(?,?,?,?)";
+    const project = db_conn.query(
+      saveProject,
+      [admin, project_name, description, JSON.stringify(members)],
+      (err, result) => {
+        if (err) throw err;
+        return res
+          .status(200)
+          .json({ result: "success", msg: "Project Successfully Created." });
+      }
+    );
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+};
 
-} catch (error) {
-  return res.status(500).json({ msg: error });
-}
-}
+export const getAllProjects = (req, res) => {
+  try {
+    const allProject =
+      "SELECT projects.id,projects.project_name,projects.members,projects.status ,users.name as admin_name FROM `projects` INNER JOIN `users` ON users.id=projects.admin_id";
+    db_conn.query(allProject, (err, result) => {
+      if (err) throw err;
+      return res
+        .status(200)
+        .json({ result: result, msg: "Project Successfully Fetched." });
+    });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+};
 
-export const getAllProjects = (req,res)=>{
-try {
- 
-  const allProject = "SELECT projects.id,projects.project_name,projects.members,projects.status ,users.name as admin_name FROM `projects` INNER JOIN `users` ON users.id=projects.admin_id";
- db_conn.query(allProject,(err,result)=>{
-    if(err) throw err;
-    return res.status(200).json({ result: result, msg: "Project Successfully Fetched." });
-  })  
+export const getSingleProject = (req, res) => {
+  const { id } = req.body;
+  try {
+    const allProject =
+      "SELECT projects.id,projects.project_name,projects.members,projects.status,projects.description,users.name as admin_name FROM `projects` INNER JOIN `users` ON users.id=projects.admin_id WHERE projects.id=?";
+    db_conn.query(allProject, [id], (err, result) => {
+      if (err) throw err;
+      return res
+        .status(200)
+        .json({ result: result, msg: "Project Successfully Fetched." });
+    });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+};
 
+export const createNewTask = (req, res) => {
+  const {
+    task_name,
+    task_desc,
+    task_assign,
+    task_assign_to,
+    project_id,
+    exp_date_time,
+  } = req.body;
 
-}
- catch (error) {
-  return res.status(500).json({ msg: error });
-}
-}
-
-export const getSingleProject=(req,res)=>{
- const {id}=req.body
- try {
-  const allProject = "SELECT projects.id,projects.project_name,projects.members,projects.status,projects.description,users.name as admin_name FROM `projects` INNER JOIN `users` ON users.id=projects.admin_id WHERE projects.id=?";
- db_conn.query(allProject,[id],(err,result)=>{
-    if(err) throw err;
-    return res.status(200).json({ result: result, msg: "Project Successfully Fetched." });
-  })  
-
-}
- catch (error) {
-  return res.status(500).json({ msg: error });
-}
-}
+  
+  try {
+    const saveProject =
+      "INSERT INTO `tasks`(project_id,assign_user_id,assign_to_user_id,task_name,description,expected_date_time) VALUES(?,?,?,?,?,?)";
+    db_conn.query(
+      saveProject,
+      [
+        project_id,
+        task_assign,
+        task_assign_to,
+        task_name,
+        task_desc,
+        exp_date_time,
+      ],
+      (err, result) => {
+        if (err) throw err;
+        return res
+          .status(200)
+          .json({ result: "success", msg: "Task Successfully Created." });
+      }
+    );
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+};
 
 // export const Test = (req, res) => {
 //   const user = "test";
