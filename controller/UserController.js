@@ -113,11 +113,13 @@ try {
 
 export const getAllProjects = (req,res)=>{
 try {
+ 
   const allProject = "SELECT projects.id,projects.project_name,projects.members,projects.status ,users.name as admin_name FROM `projects` INNER JOIN `users` ON users.id=projects.admin_id";
  db_conn.query(allProject,(err,result)=>{
     if(err) throw err;
     return res.status(200).json({ result: result, msg: "Project Successfully Fetched." });
   })  
+
 
 }
  catch (error) {
