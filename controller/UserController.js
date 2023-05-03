@@ -148,41 +148,7 @@ export const getSingleProject = (req, res) => {
   }
 };
 
-export const createNewTask = (req, res) => {
-  const {
-    task_name,
-    task_desc,
-    task_assign,
-    task_assign_to,
-    project_id,
-    exp_date_time,
-  } = req.body;
 
-  
-  try {
-    const saveProject =
-      "INSERT INTO `tasks`(project_id,assign_user_id,assign_to_user_id,task_name,description,expected_date_time) VALUES(?,?,?,?,?,?)";
-    db_conn.query(
-      saveProject,
-      [
-        project_id,
-        task_assign,
-        task_assign_to,
-        task_name,
-        task_desc,
-        exp_date_time,
-      ],
-      (err, result) => {
-        if (err) throw err;
-        return res
-          .status(200)
-          .json({ result: "success", msg: "Task Successfully Created." });
-      }
-    );
-  } catch (error) {
-    return res.status(500).json({ msg: error });
-  }
-};
 
 // export const Test = (req, res) => {
 //   const user = "test";
