@@ -1,4 +1,4 @@
-import { createNewTask,getAllTasks } from "../controller/TaskController.js";
+import { createNewTask,getAllTasks,getTask,taskStatusChange } from "../controller/TaskController.js";
 import {
   Register,
   Login,
@@ -18,6 +18,8 @@ router.get("/api/all-projects", getAllProjects);
 router.post("/api/project", getSingleProject);
 router.post("/api/create-task", createNewTask);
 router.get("/api/all-tasks", getAllTasks);
+router.get("/api/task/:id", getTask);
+router.post("/api/task-status-change", taskStatusChange);
 
 router.all("*", (req, res) => {
   res.status(200).json({ result: "failed", msg: "url not found." });

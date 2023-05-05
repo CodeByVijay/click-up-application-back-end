@@ -52,3 +52,33 @@ export const getAllTasks = (req, res) => {
     return res.status(500).json({ msg: error });
   }
 };
+
+export const getTask = (req, res) => {
+  try {
+    const taskId = req.params.id;
+    const getTask =
+      "SELECT t.id as task_id, t.task_name, t.expected_date_time, t.status,t.description as task_desc, tu.name as assignTo, u.name as assignFrom,p.project_name,p.description as project_desc,p.members as project_members,p.status as project_status, pu.name as project_manager FROM tasks t INNER JOIN projects p ON t.project_id = p.id INNER JOIN users u ON t.assign_user_id = u.id INNER JOIN users tu ON t.assign_to_user_id = tu.id INNER JOIN users pu ON p.admin_id = pu.id WHERE t.id = ?";
+    db_conn.query(getTask, [taskId], (err, result) => {
+      if (err) throw err;
+      return res.status(200).json({ result: result, msg: "Task fetched." });
+    });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+};
+
+export const taskStatusChange =(req,res)=>{
+  const {task_id,status} = req.body
+  try {
+    const statusChange =
+      "UPDATE tasks SET status=? WHERE id =?";
+    db_conn.query(statusChange, [status,task_id], (err, result) => {
+      if (err) throw err;
+      return res.status(200).json({ result: result, msg: "Task status changed." });
+    });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+  // console.log(req.body)
+
+}
