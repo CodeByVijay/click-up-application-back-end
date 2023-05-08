@@ -67,18 +67,50 @@ export const getTask = (req, res) => {
   }
 };
 
-export const taskStatusChange =(req,res)=>{
-  const {task_id,status} = req.body
+export const taskStatusChange = (req, res) => {
+  const { task_id, status } = req.body;
   try {
-    const statusChange =
-      "UPDATE tasks SET status=? WHERE id =?";
-    db_conn.query(statusChange, [status,task_id], (err, result) => {
+    const statusChange = "UPDATE tasks SET status=? WHERE id =?";
+    db_conn.query(statusChange, [status, task_id], (err, result) => {
       if (err) throw err;
-      return res.status(200).json({ result: result, msg: "Task status changed." });
+      return res
+        .status(200)
+        .json({ result: result, msg: "Task status changed." });
     });
   } catch (error) {
     return res.status(500).json({ msg: error });
   }
   // console.log(req.body)
+};
 
-}
+export const assignTask = (req, res) => {
+  const { task_id, assignUserId, assignUserName, task_assign_user_name,task_assign_user_id } =
+    req.body;
+  try {
+    const getTask =
+      "SELECT t.id as task_id, t.task_name, t.expected_date_time, t.status,t.description as task_desc, tu.name as assignTo, u.name as assignFrom,p.project_name,p.description as project_desc,p.members as project_members,p.status as project_status, pu.name as project_manager FROM tasks t INNER JOIN projects p ON t.project_id = p.id INNER JOIN users u ON t.assign_user_id = u.id INNER JOIN users tu ON t.assign_to_user_id = tu.id INNER JOIN users pu ON p.admin_id = pu.id WHERE t.id = ?";
+    db_conn.query(getTask, [task_id], (err, result) => {
+      if (err) throw err;
+
+      const assignTask = "UPDATE `tasks` SET `assign_user_id`=?,`assign_to_user_id`=? WHERE `id`=?";
+
+      db_conn.query(assignTask,[task_assign_user_id,assignUserId,task_id],(err,resp)=>{
+        if (err) throw err;
+
+        const mailData = {
+          task_name: result[0].task_name,
+          task_desc: result[0].task_desc,
+          task_assign_user_name: task_assign_user_name,
+          task_assign_to_user_name: assignUserName,
+          exp_date_time: result[0].expected_date_time,
+          project_name: result[0].project_name,
+          project_manager: result[0].project_manager,
+        };
+        taskMail(mailData);
+        return res.status(200).json({ result: result, msg: "Task Assigned." });
+      })
+    });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+};
