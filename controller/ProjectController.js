@@ -1,4 +1,4 @@
-import { json } from "express";
+import { json, query } from "express";
 import db_conn from "../connection.js";
 import { inviteProject } from "../mailTemplate/inviteProject.js";
 
@@ -77,7 +77,7 @@ export const getSingleProject = (req, res) => {
   const { id } = req.body;
   try {
     const allProject =
-      "SELECT projects.id,projects.project_name,projects.members,projects.status,projects.description,users.name as admin_name FROM `projects` INNER JOIN `users` ON users.id=projects.admin_id WHERE projects.id=?";
+      "SELECT projects.id,projects.project_name,projects.members,projects.status,projects.description,users.name as admin_name,users.id as admin_id FROM `projects` INNER JOIN `users` ON users.id=projects.admin_id WHERE projects.id=?";
     db_conn.query(allProject, [id], (err, result) => {
       if (err) throw err;
       return res
@@ -87,6 +87,49 @@ export const getSingleProject = (req, res) => {
   } catch (error) {
     return res.status(500).json({ msg: error });
   }
+};
+
+export const inviteMember = (req, res) => {
+  const { project_id, admin, project_name, members, invite_link } = req.body;
+
+  members.map((val, i) => {
+    const tokenData = {
+      project_id: project_id,
+      admin: admin,
+      project_name: project_name,
+      member: val,
+      member_name: val.label,
+      member_id: val.value,
+    };
+
+    // base64Encode
+    const tokenutf8 = Buffer.from(JSON.stringify(tokenData), "utf8");
+    let base64Token = tokenutf8.toString("base64");
+    const inviteLink = `${invite_link}${base64Token}`;
+
+    const insertInvite =
+      "INSERT INTO `invite_members`(project_id,admin_id,member,invite_token) VALUES(?,?,?,?)";
+    db_conn.query(
+      insertInvite,
+      [project_id, admin, JSON.stringify(val), base64Token],
+      (err, resp) => {
+        if (err) throw err;
+        const member_name = val.label;
+        const inviteData = {
+          project_name,
+          member_name,
+          inviteLink,
+        };
+        inviteProject(inviteData);
+      }
+    );
+  });
+
+  return res
+    .status(200)
+    .json({ result: "success", msg: "Invitation Successfully Send." });
+
+  // console.log("server ok")
 };
 
 export const verifyInviteAndAddMember = (req, res) => {
@@ -145,5 +188,86 @@ export const verifyInviteAndAddMember = (req, res) => {
         msg: "Token Mismatch or Token Not Found. Unauthorized Access.",
       });
     }
+  });
+};
+
+export const removeProjectMember = (req, res) => {
+  const { project_id, admin_id, member_id } = req.body;
+  const selProject = "SELECT * FROM `projects` WHERE `admin_id`=? AND `id`=?";
+
+  db_conn.query(selProject, [admin_id, project_id], (err, resp) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).json({
+        result: "error",
+        msg: "Internal Server Error",
+      });
+    }
+    const allMembers = JSON.parse(resp[0].members);
+    const updatedList = allMembers.filter((val) => val.value !== member_id);
+
+    const updateMember =
+      "UPDATE `projects` SET `members`=? WHERE `admin_id`=? AND `id`=?";
+    db_conn.query(
+      updateMember,
+      [JSON.stringify(updatedList), admin_id, project_id],
+      (err, upresp) => {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({
+            result: "error",
+            msg: "Internal Server Error",
+          });
+        }
+
+        return res.status(200).json({
+          result: "success",
+          msg: "Selected member successfully removed",
+        });
+      }
+    );
+  });
+};
+
+export const updateProject = (req, res) => {
+  const { project_id, admin_id, project_name, description, status } = req.body;
+  const updateProject =
+    "UPDATE `projects` SET `project_name`=?,`description`=?,`status`=? WHERE `admin_id`=? AND `id`=?";
+  db_conn.query(
+    updateProject,
+    [project_name, description, status, admin_id, project_id],
+    (err, upresp) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({
+          result: "error",
+          msg: "Internal Server Error",
+        });
+      }
+
+      return res.status(200).json({
+        result: "success",
+        msg: "Project Successfully Update.",
+      });
+    }
+  );
+};
+
+export const deleteProject = (req, res) => {
+  const project_id = req.params.id;
+  const selTask = "SELECT * FROM `tasks` WHERE `project_id`=?";
+  db_conn.query(selTask, [project_id], (err, resp) => {
+    if (err) throw err;
+    resp.map((val) => {
+      const deleteTask = "DELETE FROM `tasks` WHERE `id`=?";
+      db_conn.query(deleteTask, [val.id]);
+    });
+
+    const deleteProject = "DELETE FROM `projects` WHERE `id`=?";
+    db_conn.query(deleteProject, [project_id]);
+  });
+  return res.status(200).json({
+    result: "success",
+    msg: "Project Successfully Delete.",
   });
 };

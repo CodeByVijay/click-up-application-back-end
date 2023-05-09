@@ -57,10 +57,14 @@ export const getTask = (req, res) => {
   try {
     const taskId = req.params.id;
     const getTask =
-      "SELECT t.id as task_id, t.task_name, t.expected_date_time, t.status,t.description as task_desc, tu.name as assignTo, u.name as assignFrom,p.project_name,p.description as project_desc,p.members as project_members,p.status as project_status, pu.name as project_manager FROM tasks t INNER JOIN projects p ON t.project_id = p.id INNER JOIN users u ON t.assign_user_id = u.id INNER JOIN users tu ON t.assign_to_user_id = tu.id INNER JOIN users pu ON p.admin_id = pu.id WHERE t.id = ?";
+      "SELECT t.id as task_id, t.task_name, t.expected_date_time, t.status,t.description as task_desc, tu.name as assignTo, u.name as assignFrom,p.project_name,p.description as project_desc,p.members as project_members,p.status as project_status, pu.name as project_manager,pu.id as project_manager_id FROM tasks t INNER JOIN projects p ON t.project_id = p.id INNER JOIN users u ON t.assign_user_id = u.id INNER JOIN users tu ON t.assign_to_user_id = tu.id INNER JOIN users pu ON p.admin_id = pu.id WHERE t.id = ?";
     db_conn.query(getTask, [taskId], (err, result) => {
       if (err) throw err;
-      return res.status(200).json({ result: result, msg: "Task fetched." });
+      const selComments = "SELECT u.avatar as user_image, u.id as user_id,u.name as user_name,c.id as comment_id,c.comment as comment, c.task_id as task_id FROM task_comments c INNER JOIN users u ON c.user_id=u.id WHERE c.task_id=?"
+      db_conn.query(selComments,[taskId],(err,commentResp)=>{
+        if (err) throw err;
+        return res.status(200).json({ result: result,comments:commentResp, msg: "Task fetched." });
+      })
     });
   } catch (error) {
     return res.status(500).json({ msg: error });
