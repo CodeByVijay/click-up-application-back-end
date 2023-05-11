@@ -18,3 +18,25 @@ export const storeComment = (req, res) => {
       });
   });
 };
+
+export const deleteComment =(req, res)=>{
+  const id = req.params.id;
+
+  const deleteComment =
+  "DELETE FROM `task_comments` WHERE `id`=?";
+db_conn.query(deleteComment, [id],(err,result)=>{
+  if (err) {
+      console.log(err);
+      return res.status(500).json({
+        result: "error",
+        msg: "Internal Server Error",
+      });
+    }
+    return res.status(200).json({
+      result: "success",
+      msg: "Comment Successfully deleted.",
+    });
+});
+
+
+}

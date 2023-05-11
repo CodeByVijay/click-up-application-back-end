@@ -271,3 +271,17 @@ export const deleteProject = (req, res) => {
     msg: "Project Successfully Delete.",
   });
 };
+
+export const getMembers = (req, res) => {
+  try {
+    const project_id = req.params.project_id;
+    const getMembers =
+      "SELECT members FROM `projects` WHERE `id`=?";
+    db_conn.query(getMembers, [project_id], (err, result) => {
+      if (err) throw err;
+      return res.status(200).json({ result: result, msg: "Project members fetched." });
+    });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+};

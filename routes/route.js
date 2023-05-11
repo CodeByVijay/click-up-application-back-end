@@ -1,6 +1,6 @@
-import { storeComment } from "../controller/CommentController.js";
-import { StoreProject, getAllProjects, getSingleProject,verifyInviteAndAddMember,inviteMember,removeProjectMember,updateProject,deleteProject} from "../controller/ProjectController.js";
-import { createNewTask,getAllTasks,getTask,taskStatusChange,assignTask } from "../controller/TaskController.js";
+import { storeComment,deleteComment } from "../controller/CommentController.js";
+import { StoreProject, getAllProjects, getSingleProject,verifyInviteAndAddMember,inviteMember,removeProjectMember,updateProject,deleteProject,getMembers} from "../controller/ProjectController.js";
+import { createNewTask,getAllTasks,getTask,taskStatusChange,assignTask,getTaskByUserId,deleteTask } from "../controller/TaskController.js";
 import {
   Register,
   Login,
@@ -19,13 +19,20 @@ router.get("/api/all-projects", getAllProjects);
 router.post("/api/project", getSingleProject);
 router.post("/api/edit-project", updateProject);
 router.get("/api/delete-project/:id", deleteProject);
+router.get("/api/get-project-members/:project_id",getMembers)
 
-
+// Task
 router.post("/api/create-task", createNewTask);
 router.get("/api/all-tasks", getAllTasks);
 router.get("/api/task/:id", getTask);
 router.post("/api/task-status-change", taskStatusChange);
 router.post("/api/task-assign", assignTask);
+router.get("/api/delete-task/:id",deleteTask)
+
+
+
+// Get Task By User ID
+router.get("/api/my-task/:user_id",getTaskByUserId)
 
 router.post("/api/invite-new-member", inviteMember);
 router.post("/api/verify-invite", verifyInviteAndAddMember);
@@ -33,6 +40,7 @@ router.post("/api/remove-project-member", removeProjectMember);
 
 // Comments
 router.post("/api/store-comment",storeComment)
+router.get("/api/delete-comment/:id",deleteComment)
 
 router.all("*", (req, res) => {
   res.status(200).json({ result: "failed", msg: "url not found." });
