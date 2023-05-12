@@ -97,16 +97,39 @@ export const UserList = (req, res) => {
   }
 };
 
+export const updateProfile = (req, res) => {
+  const { id, name, email } = req.body;
+  try {
+    const profileUpdate = "UPDATE `users` SET `name`=?, `email`=? WHERE `id`=?";
+    db_conn.query(profileUpdate, [name, email, id], (err, resp) => {
+      if (err) throw err;
+      if (resp.affectedRows === 1) {
+        return res
+          .status(200)
+          .json({ result: "success", msg: "Profile Updated." });
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+};
 
-// export const Test = (req, res) => {
-//   const user = "test";
-//   const userId = "1";
-//   const accessToken = jwt.sign(
-//     { userId, user },
-//     process.env.ACCESS_TOKEN_SECRET,
-//     {
-//       expiresIn: "15s",
-//     }
-//   );
-//   console.log(accessToken);
-// };
+export const updatePassword = async (req, res)=>{
+  const { id, password } = req.body;
+  try {
+    const salt = await bcrypt.genSalt();
+    const hashPassword = await bcrypt.hash(password, salt);
+
+    const profileUpdate = "UPDATE `users` SET `password`=? WHERE `id`=?";
+    db_conn.query(profileUpdate, [hashPassword,id], (err, resp) => {
+      if (err) throw err;
+      if (resp.affectedRows === 1) {
+        return res
+          .status(200)
+          .json({ result: "success", msg: "Password Updated." });
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+}

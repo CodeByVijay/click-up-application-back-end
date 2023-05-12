@@ -5,6 +5,8 @@ import {
   Register,
   Login,
   UserList,
+  updateProfile,
+  updatePassword
 } from "../controller/UserController.js";
 import express, { json } from "express";
 const router = express.Router();
@@ -41,6 +43,10 @@ router.post("/api/remove-project-member", removeProjectMember);
 // Comments
 router.post("/api/store-comment",storeComment)
 router.get("/api/delete-comment/:id",deleteComment)
+
+// Profile 
+router.post("/api/update-profile",updateProfile)
+router.post("/api/update-password",updatePassword)
 
 router.all("*", (req, res) => {
   res.status(200).json({ result: "failed", msg: "url not found." });
