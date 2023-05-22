@@ -99,7 +99,7 @@ export const assignTask = (req, res) => {
     assignUserName,
     task_assign_user_name,
     task_assign_user_id,
-    task_status
+    task_status,
   } = req.body;
   try {
     const getTask =
@@ -112,7 +112,7 @@ export const assignTask = (req, res) => {
 
       db_conn.query(
         assignTask,
-        [task_assign_user_id, assignUserId,task_status, task_id],
+        [task_assign_user_id, assignUserId, task_status, task_id],
         (err, resp) => {
           if (err) throw err;
 
@@ -134,7 +134,7 @@ export const assignTask = (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ msg: error });
-  }
+  } 
 };
 
 export const getTaskByUserId = (req, res) => {
