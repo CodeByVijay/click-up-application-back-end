@@ -1,6 +1,6 @@
 import { storeComment,deleteComment } from "../controller/CommentController.js";
-import { StoreProject, getAllProjects, getSingleProject,verifyInviteAndAddMember,inviteMember,removeProjectMember,updateProject,deleteProject,getMembers} from "../controller/ProjectController.js";
-import { createNewTask,getAllTasks,getTask,taskStatusChange,assignTask,getTaskByUserId,deleteTask } from "../controller/TaskController.js";
+import { StoreProject, getAllProjects,getMembersProject, getSingleProject,verifyInviteAndAddMember,inviteMember,removeProjectMember,updateProject,deleteProject,getMembers} from "../controller/ProjectController.js";
+import { createNewTask,getAllTasks,getProjectTask,getTask,taskStatusChange,assignTask,getTaskByUserId,deleteTask } from "../controller/TaskController.js";
 import {
   Register,
   Login,
@@ -18,6 +18,7 @@ router.get("/api/user-list", UserList);
 
 router.post("/api/store-project", StoreProject);
 router.get("/api/all-projects", getAllProjects);
+router.get("/api/member-projects/:user_id", getMembersProject);
 router.post("/api/project", getSingleProject);
 router.post("/api/edit-project", updateProject);
 router.get("/api/delete-project/:id", deleteProject);
@@ -26,6 +27,7 @@ router.get("/api/get-project-members/:project_id",getMembers)
 // Task
 router.post("/api/create-task", createNewTask);
 router.get("/api/all-tasks", getAllTasks);
+router.get("/api/project-tasks/:project_id", getProjectTask);
 router.get("/api/task/:id", getTask);
 router.post("/api/task-status-change", taskStatusChange);
 router.post("/api/task-assign", assignTask);

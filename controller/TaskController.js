@@ -53,6 +53,20 @@ export const getAllTasks = (req, res) => {
   }
 };
 
+export const getProjectTask = (req, res)=>{
+  try {
+    const project_id = req.params.project_id;
+    // console.log(project_id)
+    const getTask = "SELECT t.id,t.task_name,t.expected_date_time,t.status,u.name as member_name, t.description FROM tasks t INNER JOIN users u ON t.assign_to_user_id=u.id WHERE t.project_id =?";
+    db_conn.query(getTask, [Number(project_id)],(err, result) => {
+      if (err) throw err;
+      return res.status(200).json({ result: result, msg: "Task fetched." });
+    });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+}
+
 export const getTask = (req, res) => {
   try {
     const taskId = req.params.id;

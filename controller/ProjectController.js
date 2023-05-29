@@ -73,6 +73,23 @@ export const getAllProjects = (req, res) => {
   }
 };
 
+export const getMembersProject = (req, res) => {
+  const user_id = req.params.user_id;
+  try {
+    const allProject =
+      "SELECT projects.id, projects.project_name,  projects.members, projects.status, users.name AS admin_name FROM projects INNER JOIN users ON users.id = projects.admin_id WHERE projects.admin_id = ? OR JSON_SEARCH(projects.members, 'one', ?) IS NOT NULL;";
+
+    db_conn.query(allProject, [user_id, user_id], (err, result) => {
+      if (err) throw err;
+      return res
+        .status(200)
+        .json({ result: result, msg: "Project Successfully Fetched." });
+    });
+  } catch (error) {
+    return res.status(500).json({ msg: error });
+  }
+};
+
 export const getSingleProject = (req, res) => {
   const { id } = req.body;
   try {
@@ -275,11 +292,12 @@ export const deleteProject = (req, res) => {
 export const getMembers = (req, res) => {
   try {
     const project_id = req.params.project_id;
-    const getMembers =
-      "SELECT members FROM `projects` WHERE `id`=?";
+    const getMembers = "SELECT members FROM `projects` WHERE `id`=?";
     db_conn.query(getMembers, [project_id], (err, result) => {
       if (err) throw err;
-      return res.status(200).json({ result: result, msg: "Project members fetched." });
+      return res
+        .status(200)
+        .json({ result: result, msg: "Project members fetched." });
     });
   } catch (error) {
     return res.status(500).json({ msg: error });
